@@ -14,13 +14,13 @@ done
 # for i in 1 2 3 4 5; do
 #     for game in cheetah-run cartpole-swingup reacher-easy finger-spin ball_in_cup-catch walker-walk; do
 #         python -m continuous_control.train \
-#                 --save_dir=exp_con/train/$game/$i \
+#                 --save_dir=exp_con/fnc/$game/$i \
 #                 --env_name $game \
 #                 --max_steps 100000 \
 #                 --resets \
 #                 --reset_interval 20000 \
 #                 --fnc \
 #                 --threshold 0.0 \
-#                 --rsp_weight 0.8
+#                 --dnr_weight 0.8
 #     done
 # done

@@ -38,7 +38,7 @@ import tensorflow as tf
 
 from bbf import spr_networks
 from bbf.replay_memory import subsequence_replay_buffer
-from bbf.weight_recyclers import get_intermediates, jit_rsp, write_log
+from bbf.weight_recyclers import get_intermediates, jit_dnr, write_log
 
 
 def _pmap_device_order():
@@ -1042,7 +1042,7 @@ class BBFAgent(dqn_agent.JaxDQNAgent):
       log_every=100,
       fnc=False,
       dead_neuron_threshold=0.0,
-      rsp_weight=0.5
+      dnr_weight=0.5
   ):
     """Initializes the agent and constructs the necessary components.
 
@@ -1274,7 +1274,7 @@ class BBFAgent(dqn_agent.JaxDQNAgent):
 
     self.fnc = fnc
     self.dead_neuron_threshold = dead_neuron_threshold
-    self.rsp_weight = rsp_weight
+    self.dnr_weight = dnr_weight
     self.current_count = {'projection/net': onp.zeros(2048)}
     self.total_count = {'projection/net': onp.zeros(2048)}
     logging.info(self.fnc)
@@ -1594,7 +1594,7 @@ class BBFAgent(dqn_agent.JaxDQNAgent):
           self.optimizer_state,
           self.current_count,
           self.total_count,
-        ) = jit_rsp(
+        ) = jit_dnr(
           self.online_params, 
           self.optimizer_state, 
           intermediates, 
@@ -1603,7 +1603,7 @@ class BBFAgent(dqn_agent.JaxDQNAgent):
           self.total_count,
           dead_neurons_threshold=self.dead_neuron_threshold,
           init_method_outgoing='random',
-          sp_weight=self.rsp_weight
+          sp_weight=self.dnr_weight
         )
     (
         new_online_params,

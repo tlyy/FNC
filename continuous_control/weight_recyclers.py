@@ -274,7 +274,7 @@ def create_masks(
     'init_method_outgoing',
   )
 )
-def jit_rsp(
+def jit_dnr(
   model,
   intermediates,
   rng,

@@ -12,7 +12,7 @@ from continuous_control.agents import DrQLearner
 from continuous_control.datasets import ReplayBuffer
 from continuous_control.evaluation import evaluate
 from continuous_control.utils import make_env
-from continuous_control.weight_recyclers import get_intermediates, jit_rsp, log_stats
+from continuous_control.weight_recyclers import get_intermediates, jit_dnr, log_stats
 
 
 
@@ -38,7 +38,7 @@ flags.DEFINE_boolean('tqdm', True, 'Use tqdm progress bar.')
 flags.DEFINE_boolean('save_video', False, 'Save videos during evaluation.')
 flags.DEFINE_boolean('fnc', False, 'High capacity and plasticity')
 flags.DEFINE_float('threshold', 0.0, 'Dead Neuron threshold')
-flags.DEFINE_float('rsp_weight', 0.8, 'weight of recycling with shrink and perturb')
+flags.DEFINE_float('dnr_weight', 0.8, 'weight of recycling with shrink and perturb')
 config_flags.DEFINE_config_file(
     'config',
     'continuous_control/configs/drq.py',
@@ -91,7 +91,7 @@ def main(_):
                    'DoubleCritic_0/Critic_0/MLP_0/Dense_1': np.zeros(256),
                    'DoubleCritic_0/Critic_1/MLP_0/Dense_1': np.zeros(256)}
     dead_neurons_threshold = FLAGS.threshold
-    rsp_weight = FLAGS.rsp_weight
+    dnr_weight = FLAGS.dnr_weight
 
     def make_pixel_env(seed, video_folder):
         return make_env(FLAGS.env_name,
@@ -152,7 +152,7 @@ def main(_):
                     rng = jax.random.PRNGKey(i)
                     intermediates = get_intermediates(agent.critic, batch)
                     # log_stats(intermediates, dead_neurons_threshold, FLAGS.save_dir)
-                    params, opt_state, total_count = jit_rsp(
+                    params, opt_state, total_count = jit_dnr(
                                         agent.critic, 
                                         intermediates,
                                         rng, 
@@ -160,7 +160,7 @@ def main(_):
                                         total_count,
                                         dead_neurons_threshold=dead_neurons_threshold,
                                         init_method_outgoing='random',
-                                        sp_weight=rsp_weight)
+                                        sp_weight=dnr_weight)
                     agent.critic = agent.critic.replace(params=params, opt_state_head=opt_state)
                 agent.update(batch)
                 
